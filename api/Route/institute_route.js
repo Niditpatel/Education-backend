@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const InstituteController = require('../controllers/institute_controller');
+const InstituteController = require('../controllers/institute.controller');
 const { checkForAuthentication, checkForAdminAuthorization } = require('../Authentication/verifyauth');
 
 

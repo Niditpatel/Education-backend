@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const ClassController = require('../controllers/class_controller');
+const ClassController = require('../controllers/class.controller');
 const { checkForAuthentication, checkForSchoolTeacherAuthorization } = require('../Authentication/verifyauth');
 
 

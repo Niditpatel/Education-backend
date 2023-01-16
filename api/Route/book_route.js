@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const BookController = require('../controllers/book_controller');
+const BookController = require('../controllers/book.controller');
 const { checkForAuthentication, checkForSchoolAdminAuthorization, checkForAdminAuthorization } = require('../Authentication/verifyauth')
 
 

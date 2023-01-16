@@ -19,11 +19,11 @@ const userSchmea = new mongoose.Schema({
     password: { type: String, default: null },
     // user role school-admin or teacher  or user
     role: {
-        type: Number,
+        type: String,
         required: true,
         default: "Teacher",
         enaum: {
-            values: ["Super Admin", "School Admin", "Teacher", "User"]
+            values: ["SuperAdmin", "SchoolAdmin", "Teacher", "User"]
         }
     },
     //  account is verified from user or not 
@@ -42,8 +42,18 @@ const userSchmea = new mongoose.Schema({
             values: [0, 1]
         }
     },
-    verificationToken: { type: String, default: null }
-});
+    verificationToken: {
+        type: {
+            token: {
+                type: String
+            },
+            expIn: {
+                type: Number
+            }
+        },
+        default: null
+    }
+}, { timestamps: true });
 
 
 userSchmea.methods.generateVerificationToken = function () {
@@ -69,16 +79,16 @@ function validateUser(user) {
         }),
         title: Joi.string().allow('Mr', 'Mrs', 'Ms', 'Miss', 'Mx', 'Dr', 'Sr').required(),
         institute: Joi.string().length(24).required(),
-        password: Joi.string().min(8).max(18).external(value => {
-            const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/
-            if (!pattern.test(value)) throw Error('A pasword should contain at least one number,one capital and one sepical character.')
-        }).default(null),
-        role: Joi.number().allow("Super Admin", "School Admin", "Teacher", "User").default("Teacher").required(),
+        password: Joi.string().default(null).min(8).max(18).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/),
+        role: Joi.number().allow("SuperAdmin", "SchoolAdmin", "Teacher", "User").default("Teacher").required(),
         isVerified: Joi.number().default(0),
         status: Joi.number().default(0),
-        verificationToken: Joi.string().default(null)
+        verificationToken: Joi.object({
+            token: Joi.string(),
+            expIn: Joi.number()
+        }).default(null)
     })
-    return joiSchema.validateAsync(user, { abortEarly: false });
+    return joiSchema.validateAsync(user);
 }
 
 const User = mongoose.model("User", userSchmea);

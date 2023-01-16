@@ -16,25 +16,25 @@ const checkForAuthentication = (req, res, next) => {
 
 // for super admin access only  
 const checkForAdminAuthorization = (req, res, next) => {
-    if (req.user.role === 0) next();
+    if ((req.user.role) === "SuperAdmin") next();
     else res.status(401).json({ message: 'unauthorized access' });
 }
 
 // for school admin and upper level
 const checkForSchoolAdminAuthorization = (req, res, next) => {
-    if (req.user.role === 1 || req.user.role === 0) next();
+    if ((req.user.role) === "SuperAdmin" || req.user.role === "SchoolAdmin") next();
     else res.status(401).json({ message: 'unauthorized access' });
 }
 
 // for teacher and upper level
 const checkForSchoolTeacherAuthorization = (req, res, next) => {
-    if (req.user.role === 2 || req.user.role === 1 || req.user.role === 0) next();
+    if (req.user.role === "Teacher" || req.user.role === "SchoolAdmin" || req.user.role === "SuperAdmin") next();
     else res.status(401).json({ message: 'unauthorized access' });
 }
 
 // for user and upper level
 const checkForUserAuthorization = (req, res, next) => {
-    if ((req.user.role === 3 || req.user.role === 2 || req.user.role === 1 || req.user.role === 0)) next();
+    if ((req.user.role === "User" || req.user.role === "SchoolAdmin" || req.user.role === "Teacher" || req.user.role === "SuperAdmin")) next();
     else res.status(401).json({ message: 'unauthorized access' });
 }
 
