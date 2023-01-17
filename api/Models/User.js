@@ -56,6 +56,9 @@ const userSchmea = new mongoose.Schema({
 }, { timestamps: true });
 
 
+
+
+// generate verification token 
 userSchmea.methods.generateVerificationToken = function () {
     const user = this;
     const verificationToken = jwt.sign(
@@ -67,14 +70,14 @@ userSchmea.methods.generateVerificationToken = function () {
 }
 
 
-
+// validate user 
 function validateUser(user) {
     const joiSchema = Joi.object({
         firstName: Joi.string().min(2).max(15).required(),
         lastName: Joi.string().min(2).max(15).required(),
         email: Joi.string().email().required().external(async (value) => {
             const user = await User.findOne({ email: value });
-            if (user) throw Error('already taken');
+            if (user) throw Error('already taken please do login or try with different email');
             else return value;
         }),
         title: Joi.string().allow('Mr', 'Mrs', 'Ms', 'Miss', 'Mx', 'Dr', 'Sr').required(),

@@ -7,18 +7,13 @@ const { checkForAuthentication, checkForAdminAuthorization } = require('../Authe
 router.use(checkForAuthentication);
 router.use(checkForAdminAuthorization);
 
-router.get('/getAll', InstituteController.institutes);
-router.get('/list', InstituteController.instituteList);
+router.get('/', InstituteController.instituteList);
 
-router.delete('/delete/:id', InstituteController.instituteDelete);
+router.delete('/:id', InstituteController.instituteDelete);
 
-router.put('/update/:id', InstituteController.instituteUpdate);
+router.put('/:id', InstituteController.instituteUpdate);
 
-router.post('/create', InstituteController.instituteCreate);
-
-
-
-
+router.post('/', InstituteController.instituteCreate);
 
 
 module.exports = router;

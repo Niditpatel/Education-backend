@@ -7,7 +7,7 @@ const { checkForAuthentication, checkForSchoolTeacherAuthorization } = require('
 router.use(checkForAuthentication);
 router.use(checkForSchoolTeacherAuthorization);
 
-router.post('/create', ClassController.classCreate);
+router.post('/', ClassController.classCreate);
 
 
 module.exports = router;

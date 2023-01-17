@@ -3,10 +3,6 @@ const mongoose = require('mongoose');
 
 
 
-exports.users = async (req, res) => {
-    const users = await User.find({}).populate('instituteId', '-_id name');
-    res.status(200).json(users);
-}
 
 // delete user 
 exports.userDelete = async (req, res) => {

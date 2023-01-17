@@ -6,13 +6,11 @@ const { checkForAuthentication, checkForSchoolAdminAuthorization } = require('..
 router.use(checkForAuthentication);
 router.use(checkForSchoolAdminAuthorization);
 
-router.get('/getall', UserController.users);
-router.get('/list', UserController.userList);
+router.get('/', UserController.userList);
 
+router.delete('/:id', UserController.userDelete);
 
-router.delete('/delete/:id', UserController.userDelete);
-
-router.put('/update/:id', UserController.userUpdate);
+router.put('/:id', UserController.userUpdate);
 
 
 module.exports = router;

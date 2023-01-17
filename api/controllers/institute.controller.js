@@ -1,6 +1,6 @@
 const e = require('express');
 const { Institute, validateInstitute } = require('../Models/Institution');
-const { search } = require('../Route/user_route');
+const { search } = require('../Route/user.route');
 
 // get all institutes 
 exports.institutes = async (req, res) => {

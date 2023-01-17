@@ -1,45 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer')
 require('dotenv').config();
 
-const { User, validateUser } = require('../Models/User');
-
-
-
-const sendMail = async (subject, url, mailText) => {
-
-    try {
-        const transpoter = nodemailer.createTransport({
-            host: process.env.SMTP_EMAIL_HOST,
-            port: process.env.SEND_ALL_EMAILS_PORT,
-            secure: false,
-            auth: {
-                user: process.env.SMTP_EMAIL_USERNAME,
-                pass: process.env.SMTP_EMAIL_PASSWORD,
-                type: process.env.SEND_ALL_EMAILS_AUTHENTICATION
-            }
-        });
-
-        const mailOptions = {
-            from: process.env.SEND_ALL_EMAILS_FROM,
-            to: process.env.SEND_ALL_EMAILS_TO,
-            subject: subject,
-            html: `<html><body>
-            <h3>This mail is from oneEducation.</h3></br></br>
-            <p> Please click ${url} to ${mailText}</p>
-            </body></html>`
-        }
-
-        const info = await transpoter.sendMail(mailOptions);
-        return info;
-    }
-    catch (e) {
-        return e;
-    }
-}
-
-
+const { validateUser } = require('../Models/User');
+const { findUserByMailService, createUserService, findByIdAndUpdateUserService, findUserByIdService } = require('../Services/user.service');
+const { mailService } = require('../Services/mail.service')
 
 
 // for generate hash password 
@@ -50,29 +15,34 @@ geneartePassword = async (value) => {
 }
 
 
-// ragister user by user and admin
-exports.signup = (req, res) => {
+// register user by user and admin
+exports.signup = async (req, res) => {
+    // check user credentials 
     validateUser(req.body).then(async value => {
+        console.log(value);
         try {
+            // user register by itself
             if (value.password !== null) {
                 const hashPassword = await geneartePassword(value.password);
-                const user = await new User({ ...value, password: hashPassword }).save();
+                // create user  
+                const user = await createUserService({ ...value, password: hashPassword });
                 const verificationToken = await user.generateVerificationToken();
                 const subject = 'Account Verification'
                 const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/verifyaccount/${verificationToken}">here</a>`
                 const mailtext = `verify your account.`
-                await sendMail(subject, url, mailtext);
-                await User.findByIdAndUpdate(user._id, { verificationToken: { token: verificationToken, expIn: null } });
+                await mailService(subject, url, mailtext, user.email);
+                await findByIdAndUpdateUserService(user._id, { verificationToken: { token: verificationToken, expIn: null } });
                 res.status(200).json({ success: 1, message: "A verification mail sent to your email account , Please verify your account.", token: verificationToken });
             }
+            // user createed by admin
             else {
-                const user = await new User({ ...value, isVerified: 1 }).save();
+                const user = await createUserService({ ...value, isVerified: 1 });
                 const activationToken = await user.generateVerificationToken();
                 const subject = 'Account Activation'
                 const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/activeaccount/${activationToken}">here</a>`
                 const mailtext = `activate your account.`
-                await sendMail(subject, url, mailtext);
-                await User.findByIdAndUpdate(user._id, { verificationToken: { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60)) } });
+                await mailService(subject, url, mailtext, user.email);
+                await findByIdAndUpdateUserService(user._id, { verificationToken: { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)) } });
                 res.status(200).json({ success: 1, message: "An activation link is sent to the user email.", token: activationToken });
             }
         } catch (e) {
@@ -84,11 +54,13 @@ exports.signup = (req, res) => {
 }
 
 
+
 // login to account 
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email: email });
+        // check for existence
+        const user = await findUserByMailService(email);
         if (user) {
             if (user.isVerified === 1) {
                 if (user.status === 1) {
@@ -100,18 +72,18 @@ exports.login = async (req, res) => {
                             process.env.USER_VERIFICATION_TOKEN_SECRET,
                             { algorithm: 'HS256' }
                         );
-                        res.status(200).json({ success: 1, token: token, LOGuser: { email: user.email, firtName: user.firstName, lastName: user.lastName, role: user.role, institute: user.institute, title: user.title } })
+                        res.status(200).json({ success: 1, token: token, LOGuser: { email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, institute: user.institute, title: user.title } })
                     } else {
-                        res.status(401).json({ success: 0, message: 'invalid userName or password.' });
+                        res.status(401).json({ success: 0, message: 'Invalid userName or password.' });
                     }
                 } else {
-                    res.status(200).json({ success: 0, message: 'your account is under verification process.' });
+                    res.status(200).json({ success: 0, message: 'Your account is under verification process.' });
                 }
             } else {
-                res.status(200).json({ success: 0, message: 'verify your account.' });
+                res.status(200).json({ success: 0, message: 'Verify your account.' });
             }
         } else {
-            res.status(401).json({ success: 0, message: 'invalid userName or password.' });
+            res.status(401).json({ success: 0, message: 'Invalid userName or password.' });
         }
     } catch (e) {
         res.status(400).json({ success: 0, message: e.message });
@@ -127,12 +99,10 @@ exports.verifyAccount = (req, res) => {
     if (token) {
         jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET, { algorithms: 'HS256' }, async (err, user) => {
             if (!err) {
-                const existsUser = await User.findById(user.id);
+                const existsUser = await findUserByIdService(user.id);
                 if (existsUser !== null && existsUser.verificationToken !== null) {
                     if (existsUser.verificationToken.token === token) {
-                        existsUser.isVerified = 1;
-                        existsUser.verificationToken = null;
-                        await existsUser.save();
+                        await findByIdAndUpdateUserService(existsUser._id, { isVerified: 1, verificationToken: null })
                         res.status(200).json({ success: 1, message: 'Thank you, Your email is verified.' });
                     } else {
                         res.status(400).json({
@@ -160,13 +130,11 @@ exports.activeAccount = (req, res) => {
     if (token) {
         jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET, { algorithms: 'HS256' }, async (err, user) => {
             if (!err) {
-                const existsUser = await User.findById(user.id);
+                const existsUser = await findUserByIdService(user.id);
                 if (existsUser !== null && existsUser.verificationToken !== null) {
                     if (existsUser.verificationToken.token === token) {
-                        console.log(existsUser.verificationToken.expIn, Date.now());
                         if (existsUser.verificationToken.expIn > Date.now()) {
-                            existsUser.status = 1
-                            await existsUser.save();
+                            await findByIdAndUpdateUserService(existsUser._id, { status: 1 });
                             res.status(200).json({ success: 1, message: "Congratulations, Your account is activated." });
                         } else {
                             res.status(400).json({ success: 2, id: (existsUser._id).valueOf(), message: "This Link Is Expired" });
@@ -191,15 +159,15 @@ exports.generateActiveLink = async (req, res) => {
     const { id, isFor, token } = req.body;
     if (id) {
         try {
-            const existsUser = User.findById(id);
+            const existsUser = await findUserByIdService(id);
+            console.log(existsUser.verificationToken.token);
             if (existsUser, existsUser.verificationToken.token === token) {
                 const activationToken = existsUser.generateVerificationToken();
-                existsUser.verificationToken = { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60)) }
+                findByIdAndUpdateUserService(existsUser._id, { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)) })
                 const subject = `${isFor === 'activeaccount' ? 'Active Account' : 'Reset Password'}`
                 const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/${isFor}/${activationToken}">here</a>`
                 const mailtext = `${isFor === 'activeaccount' ? 'activate your account.' : 'reset your password.'}`
-                await sendMail(subject, url, mailtext);
-                await existsUser.save();
+                await mailService(subject, url, mailtext, existsUser.email);
                 res.status(200).json({ success: 1, message: "activation link is sent to your registered mail, please active your account." })
             } else {
                 res.status(400).json({ success: 0, message: "something went worng please try latter" })
@@ -216,15 +184,15 @@ exports.generateActiveLink = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email: email });
+        const user = await findUserByMailService(email);
         if (user) {
             const verificationToken = user.generateVerificationToken();
-            user.verificationToken = { token: verificationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60)) }
+            await findByIdAndUpdateUserService(user._id, { verificationToken: { token: verificationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)) } });
             const subject = 'Password Reset'
-            const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/resetpassword/${activationToken}">here</a>`
+            const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/resetpassword/${verificationToken}">here</a>`
             const mailtext = `reset your password.`
-            await sendMail(subject, url, mailtext);
-            await user.save();
+            console.log(url)
+            await mailService(subject, url, mailtext, user.email);
             res.status(200).json({ success: 1, token: verificationToken, message: 'your password reset request is sent to the  your email, Please reset your password.' })
         } else {
             res.status(404).json({ success: 0, message: "please enter valid registered email address" });
@@ -242,14 +210,12 @@ exports.resetPassword = (req, res) => {
         if (token) {
             jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET, { algorithms: 'HS256' }, async (err, user) => {
                 if (!err) {
-                    const existsUser = await User.findById(user.id);
+                    const existsUser = await findUserByIdService(user.id);
                     if (existsUser !== null && existsUser.verificationToken.token === token) {
                         if (existsUser.verificationToken.expIn > Date.now()) {
                             if (password) {
                                 const hashPassword = await geneartePassword(password);
-                                existsUser.password = hashPassword;
-                                existsUser.verificationToken = null;
-                                await existsUser.save();
+                                await findByIdAndUpdateUserService(existsUser._id, { password: hashPassword, verificationToken: null });
                                 res.status(200).json({
                                     success: 1, message: "Congratulations, Your account is activated."
                                 });
@@ -271,20 +237,5 @@ exports.resetPassword = (req, res) => {
         }
     } catch (e) {
         res.status(400).json({ success: 0, message: e.message })
-    }
-}
-
-
-exports.userByEmail = async (req, res) => {
-    try {
-        const email = req.query.email;
-        const user = await User.findOne({ email: email });
-        if (user) {
-            res.status(200).send(true);
-        } else {
-            res.status(404).send(false);
-        }
-    } catch (e) {
-        res.status(400).send(false);
     }
 }
