@@ -20,27 +20,21 @@ const userSchmea = new mongoose.Schema({
     // user role school-admin or teacher  or user
     role: {
         type: String,
-        required: true,
         default: "Teacher",
+        required: true,
         enaum: {
             values: ["SuperAdmin", "SchoolAdmin", "Teacher", "User"]
         }
     },
     //  account is verified from user or not 
     isVerified: {
-        type: Number,
-        default: 0,
-        enum: {
-            values: [0, 1]
-        }
+        type: Boolean,
+        default: false,
     },
     // account is approved or not 
     status: {
-        type: Number,
-        default: 0,
-        enum: {
-            values: [0, 1]
-        }
+        type: Boolean,
+        default: false,
     },
     verificationToken: {
         type: {
@@ -83,9 +77,9 @@ function validateUser(user) {
         title: Joi.string().allow('Mr', 'Mrs', 'Ms', 'Miss', 'Mx', 'Dr', 'Sr').required(),
         institute: Joi.string().length(24).required(),
         password: Joi.string().default(null).min(8).max(18).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/),
-        role: Joi.number().allow("SuperAdmin", "SchoolAdmin", "Teacher", "User").default("Teacher").required(),
-        isVerified: Joi.number().default(0),
-        status: Joi.number().default(0),
+        role: Joi.string().allow("SuperAdmin", "SchoolAdmin", "Teacher", "User").default("Teacher"),
+        isVerified: Joi.boolean().default(false),
+        status: Joi.boolean().default(false),
         verificationToken: Joi.object({
             token: Joi.string(),
             expIn: Joi.number()

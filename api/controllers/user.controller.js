@@ -1,7 +1,6 @@
-const { User } = require('../Models/User');
 const mongoose = require('mongoose');
 
-
+const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdAndUpdateService, finOneUserAndUpdateService, listUsersService } = require('../Services/user.service')
 
 
 // delete user 
@@ -10,13 +9,13 @@ exports.userDelete = async (req, res) => {
     try {
         let user;
         if (req.user.role === 0) {
-            user = await User.findByIdAndDelete(id);
+            user = await findUserByIdAndDeleteService(id);
         } else {
-            user = await User.findOneAndDelete({ _id: id, institute: req.user.instituteId })
+            user = await findOneUserAndDeleteService({ _id: id, institute: req.user.instituteId })
         }
-        res.status(200).json({ message: `${user.firstName} ${user.lastName} is deleted` });
+        res.status(200).json({ success: 0, message: `${user.firstName} ${user.lastName} is deleted` });
     } catch (e) {
-        res.status(400).json({ message: e.message });
+        res.status(400).json({ success: 1, message: e.message });
     }
 }
 
@@ -28,13 +27,13 @@ exports.userUpdate = async (req, res) => {
     try {
         let updatedUser;
         if (req.user.role === 0) {
-            updatedUser = await User.findByIdAndUpdate(id, { ...user }, { new: true });
+            updatedUser = await findUserByIdAndUpdateService(id, { ...user });
         } else {
-            updatedUser = await User.findOneAndUpdate({ _id: id, institute: req.user.instituteId }, { ...user }, { new: true });
+            updatedUser = await finOneUserAndUpdateService({ _id: id, institute: req.user.instituteId }, { ...user });
         }
-        res.status(200).json({ message: `${updatedUser.firstName} is updated.` })
+        res.status(200).json({ success: 1, message: `${updatedUser.firstName} ${updatedUser.lastName} is updated.` })
     } catch (e) {
-        res.status(400).json({ message: e.message });
+        res.status(400).json({ success: 0, message: e.message });
     }
 }
 
@@ -43,6 +42,66 @@ exports.userUpdate = async (req, res) => {
 exports.userList = async (req, res) => {
     const { query, role, limit, offset, sort_by, order, search_schools } = req.query;
 
+    // const andQuery = [];
+
+    // const search_query = (query) => {
+    //     return {
+    //         $or: [
+    //             { firstName: { $regex: query, $options: 'i' } },
+    //             { lastName: { $regex: query, $options: 'i' } },
+    //             { email: { $regex: query, $options: 'i' } },
+    //         ]
+    //     }
+    // }
+
+    // if ((query !== undefined && query.length > 0)) {
+    //     andQuery.push(search_query(query));
+    // }
+
+    // // for super admin 
+    // if ((req.user.role === "SuperAdmin")) {
+    //     if ((role !== undefined && role.length > 0)) {
+    //         andQuery.push({ role: { $in: role } })
+    //     } else {
+    //         andQuery.push({ role: { $in: ["SchoolAdmin", "Teacher", "User"] } })
+    //     }
+    // }
+    // // for School Admin  
+    // else {
+    //     if ((role !== undefined && role.length > 0)) {
+    //         andQuery.push({ role: { $in: role } })
+    //     } else {
+    //         andQuery.push({ role: { $in: ["Teacher", "User"] } })
+    //     }
+    // }
+
+    const lookupQuery = [
+        {
+            $lookup: {
+                from: 'institutes',
+                localField: 'institute',
+                foreignField: '_id',
+                as: 'institute',
+                pipeline: [
+                    {
+                        $project: {
+                            name: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $unwind: {
+                path: '$institute',
+                // for not showing not matched doc 
+                preserveNullAndEmptyArrays: false
+            }
+        }
+    ]
+
+
+
     const search_query = ((query !== undefined && query.length > 0) ? query : '');
     const sort_order = ((order !== undefined && order.length > 0) ? parseInt(order) : 1);
     const sort_field = ((sort_by !== undefined && sort_by.length > 0) ? sort_by : '_id');
@@ -50,8 +109,8 @@ exports.userList = async (req, res) => {
     const page_no = ((offset !== undefined && offset.length > 0) ? parseInt(offset) : 0);
 
     // if super  admin  
-    if (req.user.role === 0) {
-        const filter_role = ((role !== undefined && role.length > 0) ? [parseInt(role)] : [1, 2, 3]);
+    if (req.user.role === "SuperAdmin") {
+        const filter_role = ((role !== undefined && role.length > 0) ? [role] : ["SchoolAdmin", "Teacher", "User"]);
         const school_filter = ((search_schools !== undefined && search_schools.length > 0) ? (search_schools.split('&&').map(item => item.trim())) : '');
 
         const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1, institute: 1 };
@@ -79,31 +138,10 @@ exports.userList = async (req, res) => {
             ]
         }
         try {
-            const listData = await User.aggregate([
+            const listData = await listUsersService([
                 // before population query for user
                 { $match: user_filter_query },
-                {
-                    $lookup: {
-                        from: 'institutes',
-                        localField: 'institute',
-                        foreignField: '_id',
-                        as: 'institute',
-                        pipeline: [
-                            {
-                                $project: {
-                                    name: 1
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$institute',
-                        // for not showing not matched doc 
-                        preserveNullAndEmptyArrays: false
-                    }
-                },
+                ...lookupQuery,
                 // after population query for institute
                 { $match: institute_filter_query },
                 { $project: display_fields },
@@ -117,7 +155,7 @@ exports.userList = async (req, res) => {
         }
     }
     else {
-        const filter_role = ((role !== undefined && role.length > 0) ? [parseInt(role)] : [2, 3]);
+        const filter_role = ((role !== undefined && role.length > 0) ? [role] : ["Teacher", "User"]);
 
         const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1, institute: 1 };
 
@@ -137,7 +175,7 @@ exports.userList = async (req, res) => {
         };
 
         try {
-            const listData = await User.aggregate([
+            const listData = await listUsersService([
                 { $match: user_filter_query },
                 { $project: display_fields },
                 { $skip: (page_limit * page_no) },

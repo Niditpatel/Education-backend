@@ -1,4 +1,4 @@
-const { User, validateUser } = require('../Models/User');
+const { User } = require('../Models/User');
 
 
 const findUserByMailService = async (Email) => {
@@ -20,9 +20,38 @@ const createUserService = async (user) => {
     return newUser;
 }
 
-const findByIdAndUpdateUserService = async (id, updatedData) => {
-    const upadtedUser = await User.findByIdAndUpdate(id, { ...updatedData });
+const findUserByIdAndUpdateService = async (id, updatedData) => {
+    const upadtedUser = await User.findByIdAndUpdate(id, { ...updatedData }, { new: true });
     return upadtedUser;
 }
 
-module.exports = { findUserByMailService, createUserService, findByIdAndUpdateUserService, findUserByIdService }
+const finOneUserAndUpdateService = async (searchData, updatedData) => {
+    const updatedUser = await User.findOneAndUpdate({ ...searchData }, { ...updatedData }, { new: true });
+    return updatedUser;
+}
+
+const findUserByIdAndDeleteService = async (id) => {
+    const user = await User.findByIdAndDelete(id);
+    return user;
+}
+
+const findOneUserAndDeleteService = async (data) => {
+    const user = await User.findOneAndDelete({ ...data });
+    return user;
+}
+
+const listUsersService = async (query) => {
+    const users = User.aggregate([...query]);
+    return users;
+}
+
+module.exports = {
+    findUserByMailService,
+    createUserService,
+    findUserByIdAndUpdateService,
+    findUserByIdService,
+    findUserByIdAndDeleteService,
+    findOneUserAndDeleteService,
+    finOneUserAndUpdateService,
+    listUsersService
+}

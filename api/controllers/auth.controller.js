@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const { validateUser } = require('../Models/User');
-const { findUserByMailService, createUserService, findByIdAndUpdateUserService, findUserByIdService } = require('../Services/user.service');
+const { findUserByMailService, createUserService, findUserByIdAndUpdateService, findUserByIdService } = require('../Services/user.service');
 const { mailService } = require('../Services/mail.service')
 
 
@@ -19,7 +19,6 @@ geneartePassword = async (value) => {
 exports.signup = async (req, res) => {
     // check user credentials 
     validateUser(req.body).then(async value => {
-        console.log(value);
         try {
             // user register by itself
             if (value.password !== null) {
@@ -31,18 +30,18 @@ exports.signup = async (req, res) => {
                 const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/verifyaccount/${verificationToken}">here</a>`
                 const mailtext = `verify your account.`
                 await mailService(subject, url, mailtext, user.email);
-                await findByIdAndUpdateUserService(user._id, { verificationToken: { token: verificationToken, expIn: null } });
+                await findUserByIdAndUpdateService(user._id, { verificationToken: { token: verificationToken, expIn: null } });
                 res.status(200).json({ success: 1, message: "A verification mail sent to your email account , Please verify your account.", token: verificationToken });
             }
             // user createed by admin
             else {
-                const user = await createUserService({ ...value, isVerified: 1 });
+                const user = await createUserService({ ...value, isVerified: true });
                 const activationToken = await user.generateVerificationToken();
                 const subject = 'Account Activation'
                 const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/activeaccount/${activationToken}">here</a>`
                 const mailtext = `activate your account.`
                 await mailService(subject, url, mailtext, user.email);
-                await findByIdAndUpdateUserService(user._id, { verificationToken: { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)) } });
+                await findUserByIdAndUpdateService(user._id, { verificationToken: { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)) } });
                 res.status(200).json({ success: 1, message: "An activation link is sent to the user email.", token: activationToken });
             }
         } catch (e) {
@@ -62,8 +61,8 @@ exports.login = async (req, res) => {
         // check for existence
         const user = await findUserByMailService(email);
         if (user) {
-            if (user.isVerified === 1) {
-                if (user.status === 1) {
+            if (user.isVerified === true) {
+                if (user.status === true) {
                     const id = (user._id).valueOf();
                     const isValidPassword = await bcrypt.compare(password, user.password);
                     if (isValidPassword) {
@@ -100,9 +99,9 @@ exports.verifyAccount = (req, res) => {
         jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET, { algorithms: 'HS256' }, async (err, user) => {
             if (!err) {
                 const existsUser = await findUserByIdService(user.id);
-                if (existsUser !== null && existsUser.verificationToken !== null) {
+                if (existsUser !== null && existsUser.verificationToken !== null && existsUser.isVerified !== true) {
                     if (existsUser.verificationToken.token === token) {
-                        await findByIdAndUpdateUserService(existsUser._id, { isVerified: 1, verificationToken: null })
+                        await findUserByIdAndUpdateService(existsUser._id, { isVerified: true, verificationToken: null })
                         res.status(200).json({ success: 1, message: 'Thank you, Your email is verified.' });
                     } else {
                         res.status(400).json({
@@ -131,11 +130,10 @@ exports.activeAccount = (req, res) => {
         jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET, { algorithms: 'HS256' }, async (err, user) => {
             if (!err) {
                 const existsUser = await findUserByIdService(user.id);
-                if (existsUser !== null && existsUser.verificationToken !== null) {
+                if (existsUser !== null && existsUser.verificationToken !== null && existsUser.status !== true) {
                     if (existsUser.verificationToken.token === token) {
                         if (existsUser.verificationToken.expIn > Date.now()) {
-                            await findByIdAndUpdateUserService(existsUser._id, { status: 1 });
-                            res.status(200).json({ success: 1, message: "Congratulations, Your account is activated." });
+                            res.status(200).json({ success: 1, message: "Set Password to Active Your Account" });
                         } else {
                             res.status(400).json({ success: 2, id: (existsUser._id).valueOf(), message: "This Link Is Expired" });
                         }
@@ -160,13 +158,12 @@ exports.generateActiveLink = async (req, res) => {
     if (id) {
         try {
             const existsUser = await findUserByIdService(id);
-            console.log(existsUser.verificationToken.token);
             if (existsUser, existsUser.verificationToken.token === token) {
                 const activationToken = existsUser.generateVerificationToken();
-                findByIdAndUpdateUserService(existsUser._id, { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)) })
-                const subject = `${isFor === 'activeaccount' ? 'Active Account' : 'Reset Password'}`
+                findUserByIdAndUpdateService(existsUser._id, { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)) })
+                const subject = `${isFor === 'activeAccount' ? 'Active Account' : 'Reset Password'}`
                 const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/${isFor}/${activationToken}">here</a>`
-                const mailtext = `${isFor === 'activeaccount' ? 'activate your account.' : 'reset your password.'}`
+                const mailtext = `${isFor === 'activeAccount' ? 'activate your account.' : 'reset your password.'}`
                 await mailService(subject, url, mailtext, existsUser.email);
                 res.status(200).json({ success: 1, message: "activation link is sent to your registered mail, please active your account." })
             } else {
@@ -187,11 +184,10 @@ exports.forgotPassword = async (req, res) => {
         const user = await findUserByMailService(email);
         if (user) {
             const verificationToken = user.generateVerificationToken();
-            await findByIdAndUpdateUserService(user._id, { verificationToken: { token: verificationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)) } });
-            const subject = 'Password Reset'
+            await findUserByIdAndUpdateService(user._id, { verificationToken: { token: verificationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)) } });
+            const subject = 'Reset Password '
             const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/resetpassword/${verificationToken}">here</a>`
             const mailtext = `reset your password.`
-            console.log(url)
             await mailService(subject, url, mailtext, user.email);
             res.status(200).json({ success: 1, token: verificationToken, message: 'your password reset request is sent to the  your email, Please reset your password.' })
         } else {
@@ -206,24 +202,32 @@ exports.forgotPassword = async (req, res) => {
 // for reset password 
 exports.resetPassword = (req, res) => {
     try {
-        const { password, token } = req.body;
+        const { password, token, isFor } = req.body;
         if (token) {
             jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET, { algorithms: 'HS256' }, async (err, user) => {
                 if (!err) {
                     const existsUser = await findUserByIdService(user.id);
-                    if (existsUser !== null && existsUser.verificationToken.token === token) {
-                        if (existsUser.verificationToken.expIn > Date.now()) {
-                            if (password) {
-                                const hashPassword = await geneartePassword(password);
-                                await findByIdAndUpdateUserService(existsUser._id, { password: hashPassword, verificationToken: null });
-                                res.status(200).json({
-                                    success: 1, message: "Congratulations, Your account is activated."
-                                });
+                    if (existsUser !== null && existsUser !== null && existsUser.verificationToken !== null) {
+                        if (existsUser !== null && existsUser.verificationToken.token === token) {
+                            if (existsUser.verificationToken.expIn > Date.now()) {
+                                if (password) {
+                                    const hashPassword = await geneartePassword(password);
+                                    if (isFor === 'activeAccount') {
+                                        await findUserByIdAndUpdateService(existsUser._id, { password: hashPassword, verificationToken: null, status: true });
+                                    } else {
+                                        await findUserByIdAndUpdateService(existsUser._id, { password: hashPassword, verificationToken: null });
+                                    }
+                                    res.status(200).json({
+                                        success: 1, message: "Congratulations, Your account is activated."
+                                    });
+                                } else {
+                                    res.status(400).json({ success: 0, message: "something went wrong please try again latter." })
+                                }
                             } else {
-                                res.status(400).json({ success: 0, message: "something went wrong please try again latter." })
+                                res.status(400).json({ success: 2, userId: (existsUser._id).valueOf(), message: "Link is Expired." });
                             }
                         } else {
-                            res.status(400).json({ success: 2, userId: (existsUser._id).valueOf(), message: "Link is Expired." });
+                            res.status(400).json({ success: 0, message: 'this link is not valid.' });
                         }
                     } else {
                         res.status(400).json({ success: 0, message: 'this link is not valid.' });
