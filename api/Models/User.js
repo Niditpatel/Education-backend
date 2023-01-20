@@ -22,7 +22,7 @@ const userSchmea = new mongoose.Schema({
         type: String,
         default: "Teacher",
         required: true,
-        enaum: {
+        enum: {
             values: ["SuperAdmin", "SchoolAdmin", "Teacher", "User"]
         }
     },
@@ -43,6 +43,12 @@ const userSchmea = new mongoose.Schema({
             },
             expIn: {
                 type: Number
+            },
+            isFor: {
+                type: String,
+                enum: {
+                    values: ['verification', 'resetpassword']
+                }
             }
         },
         default: null
@@ -82,7 +88,8 @@ function validateUser(user) {
         status: Joi.boolean().default(false),
         verificationToken: Joi.object({
             token: Joi.string(),
-            expIn: Joi.number()
+            expIn: Joi.number(),
+            isFor: Joi.string().allow('verification', 'resetpassword').default('verification')
         }).default(null)
     })
     return joiSchema.validateAsync(user);

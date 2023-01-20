@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdAndUpdateService, finOneUserAndUpdateService, listUsersService } = require('../Services/user.service')
+const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdAndUpdateService, finOneUserAndUpdateService, listUsersService, userCountService } = require('../Services/user.service')
 
 
 // delete user 
@@ -41,7 +41,7 @@ exports.userUpdate = async (req, res) => {
 // for user listing 
 exports.userList = async (req, res) => {
     const { query, role, limit, offset, sort_by, order, search_schools } = req.query;
-
+    console.log(req.query, "main query");
     // const andQuery = [];
 
     // const search_query = (query) => {
@@ -110,13 +110,11 @@ exports.userList = async (req, res) => {
 
     // if super  admin  
     if (req.user.role === "SuperAdmin") {
-        const filter_role = ((role !== undefined && role.length > 0) ? [role] : ["SchoolAdmin", "Teacher", "User"]);
-        const school_filter = ((search_schools !== undefined && search_schools.length > 0) ? (search_schools.split('&&').map(item => item.trim())) : '');
-
+        const filter_role = ((role !== undefined && role.length > 0) ? [...role.split('&&')] : ["SchoolAdmin", "Teacher", "User"]);
+        const school_filter = ((search_schools !== undefined && search_schools.length > 0) ? [...search_schools.split('&&').map(item => mongoose.Types.ObjectId(item))] : '');
         const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1, institute: 1 };
 
         const school_filter_query = (school_filter.length > 0 ? { $in: school_filter } : { $exists: true })
-
         const user_filter_query = {
             $and: [
                 {
@@ -125,31 +123,25 @@ exports.userList = async (req, res) => {
                             { firstName: { $regex: search_query, $options: 'i' } },
                             { lastName: { $regex: search_query, $options: 'i' } },
                             { email: { $regex: search_query, $options: 'i' } },
+                            { 'institute.name': { $regex: search_query, $options: 'i' } },
                         ]
                 },
-                { role: { $in: filter_role } }
+                { role: { $in: filter_role } },
+                { 'institute._id': school_filter_query }
             ]
         };
 
-        const institute_filter_query = {
-            $and: [
-                { 'institute.name': { $regex: search_query, $options: 'i' } },
-                { 'institute.name': school_filter_query }
-            ]
-        }
         try {
+            const count = await userCountService({ role: { $ne: 'SuperAdmin' } });
             const listData = await listUsersService([
-                // before population query for user
-                { $match: user_filter_query },
                 ...lookupQuery,
-                // after population query for institute
-                { $match: institute_filter_query },
+                { $match: user_filter_query },
                 { $project: display_fields },
                 { $skip: page_limit * page_no },
                 { $limit: page_limit },
                 { $sort: { [sort_field]: sort_order } },
             ]);
-            res.status(200).json({ data: listData, message: "success" });
+            res.status(200).json({ data: listData, count: count, message: "success" });
         } catch (e) {
             res.status(400).json({ message: e.messsage });
         }
@@ -175,6 +167,7 @@ exports.userList = async (req, res) => {
         };
 
         try {
+            const count = await userCountService({ role: { $nin: ['SuperAdmin', 'SchoolAdmin'] }, institute: { $eq: mongoose.Types.ObjectId(req.user.instituteId) } });
             const listData = await listUsersService([
                 { $match: user_filter_query },
                 { $project: display_fields },
@@ -182,7 +175,8 @@ exports.userList = async (req, res) => {
                 { $limit: page_limit },
                 { $sort: { [sort_field]: sort_order } },
             ]);
-            res.status(200).json({ data: listData, message: "success" });
+            res.status(200).json({ data: listData, count: count, message: "success" });
+
         } catch (e) {
             res.status(400).json({ message: e.messsage });
         }

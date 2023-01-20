@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 // for authentication 
 const checkForAuthentication = (req, res, next) => {
-    const token = req.headers['token'];
+    const token = req.headers['authorization'];
     if (token) {
         jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET, { algorithms: 'HS256' }, (err, user) => {
             if (!err) req.user = user, next();
