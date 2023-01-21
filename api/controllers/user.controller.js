@@ -6,22 +6,25 @@ const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdA
 // delete user 
 exports.userDelete = async (req, res) => {
     const id = req.params.id;
+    console.log(id)
     try {
         let user;
-        if (req.user.role === 0) {
+        if (req.user.role === "SuperAdmin") {
             user = await findUserByIdAndDeleteService(id);
+            console.log(user)
         } else {
             user = await findOneUserAndDeleteService({ _id: id, institute: req.user.instituteId })
         }
-        res.status(200).json({ success: 0, message: `${user.firstName} ${user.lastName} is deleted` });
+        res.status(200).json({ success: 1, message: `${user.firstName} ${user.lastName} is deleted` });
     } catch (e) {
-        res.status(400).json({ success: 1, message: e.message });
+        res.status(400).json({ success: 0, message: e.message });
     }
 }
 
 
 // update user 
 exports.userUpdate = async (req, res) => {
+    console.log(req.params, "update");
     const user = req.body;
     const id = req.params.id;
     try {
@@ -40,8 +43,8 @@ exports.userUpdate = async (req, res) => {
 
 // for user listing 
 exports.userList = async (req, res) => {
+    console.log(req.params, "userlist");
     const { query, role, limit, offset, sort_by, order, search_schools } = req.query;
-    console.log(req.query, "main query");
     // const andQuery = [];
 
     // const search_query = (query) => {

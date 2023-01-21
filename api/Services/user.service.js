@@ -32,6 +32,7 @@ const finOneUserAndUpdateService = async (searchData, updatedData) => {
 
 const findUserByIdAndDeleteService = async (id) => {
     const user = await User.findByIdAndDelete(id);
+    console.log(user);
     return user;
 }
 
