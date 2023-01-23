@@ -77,7 +77,7 @@ function validateUser(user) {
         lastName: Joi.string().min(2).max(15).required(),
         email: Joi.string().email().required().external(async (value) => {
             const user = await User.findOne({ email: value });
-            if (user) throw Error('already taken please do login or try with different email');
+            if (user) throw Error('this email address already have account');
             else return value;
         }),
         title: Joi.string().allow('Mr', 'Mrs', 'Ms', 'Miss', 'Mx', 'Dr', 'Sr').required(),

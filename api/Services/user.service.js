@@ -11,8 +11,12 @@ const findUserByMailService = async (Email) => {
 }
 
 const findUserByIdService = async (id) => {
-    const user = await User.findById(id);
-    return user;
+    const user = await User.findById(id).populate('institute', 'name');
+    if (user) {
+        return user;
+    } else {
+        throw new Error("User Not Found");
+    }
 }
 
 const createUserService = async (user) => {
@@ -21,8 +25,8 @@ const createUserService = async (user) => {
 }
 
 const findUserByIdAndUpdateService = async (id, updatedData) => {
-    const upadtedUser = await User.findByIdAndUpdate(id, { ...updatedData }, { new: true });
-    return upadtedUser;
+    const updatedUser = await User.findByIdAndUpdate(id, { ...updatedData }, { new: true });
+    return updatedUser;
 }
 
 const finOneUserAndUpdateService = async (searchData, updatedData) => {

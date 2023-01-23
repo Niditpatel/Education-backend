@@ -7,6 +7,7 @@ router.use(checkForAuthentication);
 router.use(checkForSchoolAdminAuthorization);
 
 router.get('/', UserController.userList);
+router.get('/:id', UserController.findUser);
 
 router.delete('/:id', UserController.userDelete);
 

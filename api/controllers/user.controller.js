@@ -1,6 +1,21 @@
 const mongoose = require('mongoose');
 
-const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdAndUpdateService, finOneUserAndUpdateService, listUsersService, userCountService } = require('../Services/user.service')
+const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdAndUpdateService, finOneUserAndUpdateService, listUsersService, userCountService, findUserByIdService } = require('../Services/user.service')
+
+
+
+exports.findUser = async (req, res) => {
+    const id = req.params.id;
+    console.log(id, "finduser");
+    try {
+        const user = await findUserByIdService(id);
+        res.status(200).json({ success: 1, user: user, message: '' })
+    } catch (e) {
+        res.status(400).json({ success: 0, message: e.message });
+    }
+}
+
+
 
 
 // delete user 
@@ -8,6 +23,7 @@ exports.userDelete = async (req, res) => {
     const id = req.params.id;
     console.log(id)
     try {
+        await findUserByIdService(id);
         let user;
         if (req.user.role === "SuperAdmin") {
             user = await findUserByIdAndDeleteService(id);
@@ -24,12 +40,13 @@ exports.userDelete = async (req, res) => {
 
 // update user 
 exports.userUpdate = async (req, res) => {
-    console.log(req.params, "update");
     const user = req.body;
     const id = req.params.id;
+    console.log(req.params, "update");
     try {
         let updatedUser;
-        if (req.user.role === 0) {
+        await findUserByIdService(id);
+        if (req.user.role === "SuperAdmin") {
             updatedUser = await findUserByIdAndUpdateService(id, { ...user });
         } else {
             updatedUser = await finOneUserAndUpdateService({ _id: id, institute: req.user.instituteId }, { ...user });
@@ -43,7 +60,6 @@ exports.userUpdate = async (req, res) => {
 
 // for user listing 
 exports.userList = async (req, res) => {
-    console.log(req.params, "userlist");
     const { query, role, limit, offset, sort_by, order, search_schools } = req.query;
     // const andQuery = [];
 

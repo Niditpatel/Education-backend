@@ -182,6 +182,7 @@ exports.generateActiveLink = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
+        console.log(req.body, "email")
         const user = await findUserByMailService(email);
         if (user) {
             const verificationToken = user.generateVerificationToken();
@@ -190,7 +191,7 @@ exports.forgotPassword = async (req, res) => {
             const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/resetpassword/${verificationToken}">here</a>`
             const mailtext = `reset your password.`
             await mailService(subject, url, mailtext, user.email);
-            res.status(200).json({ success: 1, token: verificationToken, message: 'your password reset request is sent to the  your email, Please reset your password.' })
+            res.status(200).json({ success: 1, token: verificationToken, message: 'Reset password request is sent to the registered email' })
         } else {
             res.status(404).json({ success: 0, message: "please enter valid registered email address" });
         }
