@@ -160,13 +160,13 @@ exports.userList = async (req, res) => {
                 { $limit: page_limit },
                 { $sort: { [sort_field]: sort_order } },
             ]);
-            res.status(200).json({ data: listData, count: count, message: "success" });
+            res.status(200).json({ data: listData, count: count, message: "success", success: 1 });
         } catch (e) {
-            res.status(400).json({ message: e.messsage });
+            res.status(400).json({ message: e.messsage, success: 0 });
         }
     }
     else {
-        const filter_role = ((role !== undefined && role.length > 0) ? [role] : ["Teacher", "User"]);
+        const filter_role = ((role !== undefined && role.length > 0) ? [...role.split('&&')] : ["Teacher", "User"]);
 
         const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1, institute: 1 };
 
@@ -184,7 +184,6 @@ exports.userList = async (req, res) => {
                 { institute: mongoose.Types.ObjectId(req.user.instituteId) }
             ]
         };
-
         try {
             const count = await userCountService({ role: { $nin: ['SuperAdmin', 'SchoolAdmin'] }, institute: { $eq: mongoose.Types.ObjectId(req.user.instituteId) } });
             const listData = await listUsersService([
@@ -194,10 +193,9 @@ exports.userList = async (req, res) => {
                 { $limit: page_limit },
                 { $sort: { [sort_field]: sort_order } },
             ]);
-            res.status(200).json({ data: listData, count: count, message: "success" });
-
+            res.status(200).json({ data: listData, count: count, message: "success", success: 1 });
         } catch (e) {
-            res.status(400).json({ message: e.messsage });
+            res.status(400).json({ message: e.messsage, success: 0 });
         }
     }
 }
