@@ -50,10 +50,7 @@ const listUsersService = async (query) => {
     return users;
 }
 
-const userCountService = async (query) => {
-    const count = await User.find({ ...query }).count();
-    return count;
-}
+
 
 module.exports = {
     findUserByMailService,
@@ -63,6 +60,5 @@ module.exports = {
     findUserByIdAndDeleteService,
     findOneUserAndDeleteService,
     finOneUserAndUpdateService,
-    listUsersService,
-    userCountService
+    listUsersService
 }

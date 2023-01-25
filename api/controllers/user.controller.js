@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdAndUpdateService, finOneUserAndUpdateService, listUsersService, userCountService, findUserByIdService } = require('../Services/user.service')
+const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdAndUpdateService, finOneUserAndUpdateService, listUsersService, findUserByIdService } = require('../Services/user.service')
 
 
 
@@ -151,16 +151,29 @@ exports.userList = async (req, res) => {
         };
 
         try {
-            const count = await userCountService({ role: { $ne: 'SuperAdmin' } });
             const listData = await listUsersService([
                 ...lookupQuery,
                 { $match: user_filter_query },
                 { $project: display_fields },
-                { $skip: page_limit * page_no },
-                { $limit: page_limit },
-                { $sort: { [sort_field]: sort_order } },
+                {
+                    $facet: {
+                        metadata: [
+                            {
+                                $group: {
+                                    _id: null,
+                                    total: { $sum: 1 }
+                                }
+                            },
+                        ],
+                        data: [
+                            { $sort: { [sort_field]: sort_order } },
+                            { $skip: page_limit * page_no },
+                            { $limit: page_limit },
+                        ]
+                    }
+                },
             ]);
-            res.status(200).json({ data: listData, count: count, message: "success", success: 1 });
+            res.status(200).json({ data: listData[0].data, count: listData[0].metadata[0].total, message: "success", success: 1 });
         } catch (e) {
             res.status(400).json({ message: e.messsage, success: 0 });
         }
@@ -185,15 +198,28 @@ exports.userList = async (req, res) => {
             ]
         };
         try {
-            const count = await userCountService({ role: { $nin: ['SuperAdmin', 'SchoolAdmin'] }, institute: { $eq: mongoose.Types.ObjectId(req.user.instituteId) } });
             const listData = await listUsersService([
                 { $match: user_filter_query },
                 { $project: display_fields },
-                { $skip: (page_limit * page_no) },
-                { $limit: page_limit },
-                { $sort: { [sort_field]: sort_order } },
+                {
+                    $facet: {
+                        metadata: [
+                            {
+                                $group: {
+                                    _id: null,
+                                    total: { $sum: 1 }
+                                }
+                            },
+                        ],
+                        data: [
+                            { $sort: { [sort_field]: sort_order } },
+                            { $skip: page_limit * page_no },
+                            { $limit: page_limit },
+                        ]
+                    }
+                },
             ]);
-            res.status(200).json({ data: listData, count: count, message: "success", success: 1 });
+            res.status(200).json({ data: listData[0].data, count: listData[0].metadata[0].total, message: "success", success: 1 });
         } catch (e) {
             res.status(400).json({ message: e.messsage, success: 0 });
         }
