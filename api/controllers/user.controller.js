@@ -6,7 +6,6 @@ const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdA
 
 exports.findUser = async (req, res) => {
     const id = req.params.id;
-    console.log(id, "finduser");
     try {
         const user = await findUserByIdService(id);
         res.status(200).json({ success: 1, user: user, message: '' })
@@ -21,13 +20,11 @@ exports.findUser = async (req, res) => {
 // delete user 
 exports.userDelete = async (req, res) => {
     const id = req.params.id;
-    console.log(id)
     try {
         await findUserByIdService(id);
         let user;
         if (req.user.role === "SuperAdmin") {
             user = await findUserByIdAndDeleteService(id);
-            console.log(user)
         } else {
             user = await findOneUserAndDeleteService({ _id: id, institute: req.user.instituteId })
         }
@@ -42,7 +39,6 @@ exports.userDelete = async (req, res) => {
 exports.userUpdate = async (req, res) => {
     const user = req.body;
     const id = req.params.id;
-    console.log(req.params, "update");
     try {
         let updatedUser;
         await findUserByIdService(id);
@@ -61,38 +57,6 @@ exports.userUpdate = async (req, res) => {
 // for user listing 
 exports.userList = async (req, res) => {
     const { query, role, limit, offset, sort_by, order, search_schools } = req.query;
-    // const andQuery = [];
-
-    // const search_query = (query) => {
-    //     return {
-    //         $or: [
-    //             { firstName: { $regex: query, $options: 'i' } },
-    //             { lastName: { $regex: query, $options: 'i' } },
-    //             { email: { $regex: query, $options: 'i' } },
-    //         ]
-    //     }
-    // }
-
-    // if ((query !== undefined && query.length > 0)) {
-    //     andQuery.push(search_query(query));
-    // }
-
-    // // for super admin 
-    // if ((req.user.role === "SuperAdmin")) {
-    //     if ((role !== undefined && role.length > 0)) {
-    //         andQuery.push({ role: { $in: role } })
-    //     } else {
-    //         andQuery.push({ role: { $in: ["SchoolAdmin", "Teacher", "User"] } })
-    //     }
-    // }
-    // // for School Admin  
-    // else {
-    //     if ((role !== undefined && role.length > 0)) {
-    //         andQuery.push({ role: { $in: role } })
-    //     } else {
-    //         andQuery.push({ role: { $in: ["Teacher", "User"] } })
-    //     }
-    // }
 
     const lookupQuery = [
         {
