@@ -93,7 +93,7 @@ exports.userList = async (req, res) => {
 
     // if super  admin  
     if (req.user.role === "SuperAdmin") {
-        const filter_role = ((role !== undefined && role.length > 0) ? [...role.split('&&')] : ["SchoolAdmin", "Teacher", "User"]);
+        const filter_role = ((role !== undefined && role.length > 0) ? [...role.split('&&')] : ["SchoolAdmin", "Teacher", "User", "SuperAdmin"]);
         const school_filter = ((search_schools !== undefined && search_schools.length > 0) ? [...search_schools.split('&&').map(item => mongoose.Types.ObjectId(item))] : '');
         const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1, institute: 1 };
 
@@ -137,7 +137,11 @@ exports.userList = async (req, res) => {
                     }
                 },
             ]);
-            res.status(200).json({ data: listData[0].data, count: listData[0].metadata[0].total, message: "success", success: 1 });
+            const data = listData[0].data.map((item) => {
+                const { institute, ...restItem } = item;
+                return { instituteId: institute._id, institute: institute.name, ...restItem }
+            })
+            res.status(200).json({ data: listData[0].data, count: listData[0].metadata[0].total, message: "success", success: 1, newData: data });
         } catch (e) {
             res.status(400).json({ message: e.messsage, success: 0 });
         }
@@ -183,7 +187,8 @@ exports.userList = async (req, res) => {
                     }
                 },
             ]);
-            res.status(200).json({ data: listData[0].data, count: listData[0].metadata[0].total, message: "success", success: 1 });
+            const { institute, ...restData } = listData[0].data
+            res.status(200).json({ data: { institute: institute.name, instituteId: institute._id, ...restData }, count: listData[0].metadata[0].total, message: "success", success: 1 });
         } catch (e) {
             res.status(400).json({ message: e.messsage, success: 0 });
         }
