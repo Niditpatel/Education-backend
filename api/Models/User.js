@@ -75,11 +75,7 @@ function validateUser(user) {
     const joiSchema = Joi.object({
         firstName: Joi.string().min(2).max(15).required(),
         lastName: Joi.string().min(2).max(15).required(),
-        email: Joi.string().email().required().external(async (value) => {
-            const user = await User.findOne({ email: value });
-            if (user) throw Error('this email address already have an account');
-            else return value;
-        }),
+        email: Joi.string().email().required(),
         title: Joi.string().allow('Mr', 'Mrs', 'Ms', 'Miss', 'Mx', 'Dr', 'Sr').required(),
         institute: Joi.string().length(24).required(),
         password: Joi.string().default(null).min(8).max(18).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/),

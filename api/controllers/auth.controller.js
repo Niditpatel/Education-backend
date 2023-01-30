@@ -20,29 +20,34 @@ exports.signup = async (req, res) => {
     // check user credentials 
     validateUser(req.body).then(async value => {
         try {
-            // user register by itself
-            if (value.password !== null) {
-                const hashPassword = await geneartePassword(value.password);
-                // create user  
-                const user = await createUserService({ ...value, password: hashPassword });
-                const verificationToken = await user.generateVerificationToken();
-                const subject = 'Account Verification'
-                const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/verifyaccount/${verificationToken}">here</a>`
-                const mailtext = `verify your account.`
-                await mailService(subject, url, mailtext, user.email);
-                await findUserByIdAndUpdateService(user._id, { verificationToken: { token: verificationToken, expIn: null, isFor: 'verification' } });
-                res.status(200).json({ success: 1, message: "A verification mail sent to your email account , Please verify your account.", token: verificationToken });
-            }
-            // user createed by admin
-            else {
-                const user = await createUserService({ ...value, isVerified: true });
-                const activationToken = await user.generateVerificationToken();
-                const subject = 'Account Activation'
-                const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/activeaccount/${activationToken}">here</a>`
-                const mailtext = `activate your account.`
-                await mailService(subject, url, mailtext, user.email);
-                await findUserByIdAndUpdateService(user._id, { verificationToken: { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)), isFor: 'verification' } });
-                res.status(200).json({ success: 1, message: "An activation link is sent to the user email.", token: activationToken });
+            const existsUser = await findUserByMailService(value.email);
+            if (!existsUser) {
+                // user register by itself
+                if (value.password !== null) {
+                    const hashPassword = await geneartePassword(value.password);
+                    // create user  
+                    const user = await createUserService({ ...value, password: hashPassword });
+                    const verificationToken = await user.generateVerificationToken();
+                    const subject = 'Account Verification'
+                    const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/verifyaccount/${verificationToken}">here</a>`
+                    const mailtext = `verify your account.`
+                    await mailService(subject, url, mailtext, user.email);
+                    await findUserByIdAndUpdateService(user._id, { verificationToken: { token: verificationToken, expIn: null, isFor: 'verification' } });
+                    res.status(200).json({ success: 1, message: "A verification mail sent to your email account , Please verify your account.", token: verificationToken });
+                }
+                // user createed by admin
+                else {
+                    const user = await createUserService({ ...value, isVerified: true });
+                    const activationToken = await user.generateVerificationToken();
+                    const subject = 'Account Activation'
+                    const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/activeaccount/${activationToken}">here</a>`
+                    const mailtext = `activate your account.`
+                    await mailService(subject, url, mailtext, user.email);
+                    await findUserByIdAndUpdateService(user._id, { verificationToken: { token: activationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)), isFor: 'verification' } });
+                    res.status(200).json({ success: 1, message: "An activation link is sent to the user email.", token: activationToken });
+                }
+            } else {
+                res.status(400).json({ success: 0, message: "This email is already registered" })
             }
         } catch (e) {
             res.status(400).json({ success: 0, message: e.message });

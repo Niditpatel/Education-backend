@@ -5,8 +5,6 @@ const findUserByMailService = async (Email) => {
     const user = await User.findOne({ email: Email });
     if (user) {
         return user;
-    } else {
-        throw new Error("Not found any account with this mail.");
     }
 }
 

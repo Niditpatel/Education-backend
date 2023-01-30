@@ -9,7 +9,7 @@ router.get('/title', (req, res) => {
 router.get('/searchinstitute', async (req, res) => {
     try {
         const key = req.query.key;
-        const institutes = await Institute.find({ name: { $regex: key, $options: 'i' } }).select('name').limit(15)
+        const institutes = await Institute.find({ name: { $regex: key, $options: 'i' } }).select('name').limit(5)
         res.status(200).json(institutes);
     } catch (e) {
         res.status(400).json({ success: 0, message: e.message })

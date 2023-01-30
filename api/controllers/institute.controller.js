@@ -1,6 +1,7 @@
 const e = require('express');
 const { Institute, validateInstitute } = require('../Models/Institution');
-const { search } = require('../Route/user.route');
+const { findInstituteByIdentifier, createInstituteService, deleteInstituteService, updateInstituteService } = require('../Services/institute.service');
+// const { search } = require('../Route/user.route');
 
 // get all institutes 
 exports.institutes = async (req, res) => {
@@ -28,24 +29,27 @@ exports.instituteById = async (req, res) => {
 exports.instituteCreate = (req, res) => {
     const institute = req.body;
     validateInstitute(institute).then(async (value) => {
-        try {
-            const institute = await new Institute({ ...value }).save();
-            console.log(institute);
-            res.status(200).json({ message: 'created successfully' })
-        } catch (e) {
-            res.status(400).json({ message: e.message })
+        const existsInstitute = await findInstituteByIdentifier(value.identifier);
+        if (!existsInstitute) {
+            try {
+                const institute = await createInstituteService(value);
+                res.status(200).json({ message: 'created successfully' })
+            } catch (e) {
+                res.status(400).json({ message: e.message })
+            }
+        } else {
+            res.status(400).json({ success: 0, message: "Identifier Must Be Unique" })
         }
     }).catch(e => {
         res.status(400).json(e.message);
     })
-
 }
 
 // delete institute 
 exports.instituteDelete = async (req, res) => {
     const id = req.params.id;
     try {
-        const institute = await Institute.findByIdAndDelete(id);
+        const institute = await deleteInstituteService(id);
         res.status(200).json({ message: `${institute.name} is deleted.` })
     } catch {
         res.status(400).json({ message: e.message })
@@ -58,7 +62,7 @@ exports.instituteUpdate = async (req, res) => {
     const institute = req.body;
     const id = req.params.id;
     try {
-        await Institute.findByIdAndUpdate(id, { ...institute });
+        await updateInstituteService(id, institute);
         res.status(200).json({ message: e.message });
     } catch (e) {
         res.status(400).json({ message: e.message });

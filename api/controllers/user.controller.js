@@ -141,7 +141,7 @@ exports.userList = async (req, res) => {
                 const { institute, ...restItem } = item;
                 return { instituteId: institute._id, institute: institute.name, ...restItem }
             })
-            res.status(200).json({ data: listData[0].data, count: listData[0].metadata[0].total, message: "success", success: 1, newData: data });
+            res.status(200).json({ data: data, count: listData[0].metadata[0].total, message: "success", success: 1, newData: data });
         } catch (e) {
             res.status(400).json({ message: e.messsage, success: 0 });
         }
