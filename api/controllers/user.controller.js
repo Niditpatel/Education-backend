@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdAndUpdateService, finOneUserAndUpdateService, listUsersService, findUserByIdService } = require('../Services/user.service')
 
+const { mailService } = require('../Services/mail.service')
 
 
 exports.findUser = async (req, res) => {
@@ -41,13 +42,26 @@ exports.userUpdate = async (req, res) => {
     const id = req.params.id;
     try {
         let updatedUser;
-        await findUserByIdService(id);
-        if (req.user.role === "SuperAdmin") {
-            updatedUser = await findUserByIdAndUpdateService(id, { ...user });
+        let verificationToken;
+        const existsUser = await findUserByIdService(id);
+        if (user) {
+            verificationToken = await existsUser.generateVerificationToken();
+            if (req.user.role === "SuperAdmin") {
+                updatedUser = await findUserByIdAndUpdateService(id, { isVerified: false, verificationToken: { token: verificationToken, expIn: null, isFor: 'verification' }, ...user });
+            } else {
+                updatedUser = await finOneUserAndUpdateService({ _id: id, institute: req.user.instituteId }, {
+                    isVerified: false, verificationToken: { token: verificationToken, expIn: null, isFor: 'verification' }
+                    , ...user
+                });
+            }
+            const subject = 'Account Verification'
+            const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/verifyaccount/${verificationToken}">here</a>`
+            const mailtext = `verify your account.`
+            await mailService(subject, url, mailtext, user.email);
+            res.status(200).json({ success: 1, message: `${updatedUser.firstName} ${updatedUser.lastName} is updated.` })
         } else {
-            updatedUser = await finOneUserAndUpdateService({ _id: id, institute: req.user.instituteId }, { ...user });
+            res.status(400).json({ success: 0, message: 'Something went wrong try again latter' })
         }
-        res.status(200).json({ success: 1, message: `${updatedUser.firstName} ${updatedUser.lastName} is updated.` })
     } catch (e) {
         res.status(400).json({ success: 0, message: e.message });
     }
@@ -139,9 +153,13 @@ exports.userList = async (req, res) => {
             ]);
             const data = listData[0].data.map((item) => {
                 const { institute, ...restItem } = item;
-                return { instituteId: institute._id, institute: institute.name, ...restItem }
+                return { ...restItem, instituteId: institute._id, institute: institute.name }
             })
-            res.status(200).json({ data: data, count: listData[0].metadata[0].total, message: "success", success: 1, newData: data });
+            if (data.length > 0) {
+                res.status(200).json({ data: data, count: listData[0].metadata[0].total, message: "success", success: 1 });
+            } else {
+                res.status(404).json({ success: 0, message: 'no data found with match query' });
+            }
         } catch (e) {
             res.status(400).json({ message: e.messsage, success: 0 });
         }
@@ -149,7 +167,7 @@ exports.userList = async (req, res) => {
     else {
         const filter_role = ((role !== undefined && role.length > 0) ? [...role.split('&&')] : ["Teacher", "User"]);
 
-        const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1, institute: 1 };
+        const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1 };
 
         const user_filter_query = {
             $and: [
@@ -187,8 +205,11 @@ exports.userList = async (req, res) => {
                     }
                 },
             ]);
-            const { institute, ...restData } = listData[0].data
-            res.status(200).json({ data: { institute: institute.name, instituteId: institute._id, ...restData }, count: listData[0].metadata[0].total, message: "success", success: 1 });
+            if (listData[0].data.length > 0) {
+                res.status(200).json({ data: listData[0].data, count: count, message: "success", success: 1 });
+            } else {
+                res.status(404).json({ success: 0, message: 'no data found with match query' })
+            }
         } catch (e) {
             res.status(400).json({ message: e.messsage, success: 0 });
         }

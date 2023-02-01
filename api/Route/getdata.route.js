@@ -28,6 +28,9 @@ router.get('/roles', checkForAuthentication, checkForSchoolAdminAuthorization, a
     } catch (e) {
         res.status(400).json({ success: 0, message: e.message })
     }
-})
+});
+
+
+
 
 module.exports = router;

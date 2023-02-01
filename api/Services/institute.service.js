@@ -6,8 +6,6 @@ const findInstituteByIdentifier = async (identifier) => {
     const institute = await Institute.findOne({ identifier: identifier });
     if (institute) {
         return institute
-    } else {
-        throw new Error("Institute Not Found");
     }
 }
 

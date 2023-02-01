@@ -117,3 +117,48 @@ exports.instituteList = async (req, res) => {
         res.status(400).json({ message: e.message })
     }
 }
+
+
+
+exports.getTypes = (req, res) => {
+    const types = [
+        'Primary School',
+        'Secondary School',
+        'Special School',
+        'Intermediate School',
+        'College',
+        'University',
+        'Acadamy',
+        "Free School",
+        "Independent",
+        "Other"
+    ]
+    res.status(200).json(types);
+}
+
+exports.getTerritory = (req, res) => {
+    const territories = [
+        'Andaman and Nicobar',
+        'Chandigarh',
+        'Dadra and Nagar Haveli',
+        'Daman and Diu',
+        'Ladakh',
+        "Delhi",
+        'Lakshadweep'
+    ];
+
+    res.status(200).json(territories);
+}
+
+exports.getLevel = (req, res) => {
+    const levels = [
+        'Pre Primary',
+        "Primary",
+        "Middle",
+        "Secondary",
+        "Higher Secondary",
+        "Degree",
+        "Other"
+    ];
+    res.status(200).json(levels);
+}

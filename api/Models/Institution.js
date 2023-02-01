@@ -14,22 +14,19 @@ const instituteSchema = new mongoose.Schema({
     localAuthority: { type: String, required: true },
     homePage: { type: String },
     level: { type: String, required: true },
-    noOfStudents: { type: String },
+    noOfStudents: { type: Number },
     type: { type: String, default: null },
     isGuest: {
-        type: Number,
-        default: 0,
-        enum: {
-            values: [0, 1]
-        }
+        type: Boolean,
+        default: false,
     }
-});
+}, { timestamps: true });
 
 
 function validateInstitute(institute) {
     const joiSchema = Joi.object({
         name: Joi.string().min(3).max(20).required(),
-        identifier: Joi.string().required().external(async (value) => {
+        identifier: Joi.string().length(14).required().external(async (value) => {
             const institute = await Institute.findOne({ identifier: value });
             if (institute) throw Error("identifier should be unique");
             else return value;
@@ -47,9 +44,9 @@ function validateInstitute(institute) {
         localAuthority: Joi.string().required(),
         homePage: Joi.string(),
         level: Joi.string().required(),
-        noOfStudents: Joi.number(),
+        noOfStudents: Joi.string(),
         type: Joi.string().default(null),
-        isGuest: Joi.number().allow(0, 1).default(0)
+        isGuest: Joi.boolean().default(false)
     })
 
     return joiSchema.validateAsync(institute, { abortEarly: false })

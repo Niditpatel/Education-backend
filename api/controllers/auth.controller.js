@@ -187,16 +187,19 @@ exports.generateActiveLink = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        console.log(req.body, "email")
         const user = await findUserByMailService(email);
         if (user) {
-            const verificationToken = user.generateVerificationToken();
-            await findUserByIdAndUpdateService(user._id, { verificationToken: { token: verificationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)), isFor: 'resetpassword' } });
-            const subject = 'Reset Password '
-            const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/resetpassword/${verificationToken}">here</a>`
-            const mailtext = `reset your password.`
-            await mailService(subject, url, mailtext, user.email);
-            res.status(200).json({ success: 1, token: verificationToken, message: 'Reset password request is sent to the registered email' })
+            if (user.verificationToken === null || user.verificationToken.isFor === 'resetpassword') {
+                const verificationToken = user.generateVerificationToken();
+                await findUserByIdAndUpdateService(user._id, { verificationToken: { token: verificationToken, expIn: ((Date.now()) + (2 * 24 * 60 * 60 * 1000)), isFor: 'resetpassword' } });
+                const subject = 'Reset Password '
+                const url = `<a  href="${process.env.PUBLIC_WEB_APP_URL}/resetpassword/${verificationToken}">here</a>`
+                const mailtext = `reset your password.`
+                await mailService(subject, url, mailtext, user.email);
+                res.status(200).json({ success: 1, token: verificationToken, message: 'Reset password request is sent to the registered email' })
+            } else if (user.verificationToken.isFor === 'verification') {
+                res.status(400).json({ success: 0, message: 'verify your account first' });
+            }
         } else {
             res.status(404).json({ success: 0, message: "please enter valid registered email address" });
         }
