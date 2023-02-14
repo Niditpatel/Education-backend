@@ -13,14 +13,14 @@ const classSchema = new mongoose.Schema({
         type: String,
         default: null,
         enum: {
-            values: ['KS1', 'KS2', 'KS3', 'KS4', 'KS5']
+            values: ["Foundation Stage", 'KS1', 'KS2', 'KS3', 'KS4', 'KS5']
         }
     },
     examBoard: {
         type: String,
         default: null,
         enum: {
-            values: ['EdExcel', 'AQA', 'Gujarat', 'Other']
+            values: ["State Board", "CBSE", "ICSE", "CISCE", "NIOS", "IB", "CIE"]
         }
     }
 });
@@ -33,8 +33,8 @@ function validateClass(Class) {
         noOfStudents: Joi.number().default(null),
         assignee: Joi.array().items(Joi.string()).default(null),
         institute: Joi.string().length(24).required(),
-        keyStage: Joi.string().allow('KS1', 'KS2', 'KS3', 'KS4', 'KS5').default(null),
-        examBoard: Joi.string().allow('EdExcel', 'AQA', 'Gujarat', 'Other').default(null)
+        keyStage: Joi.string().allow("Foundation Stage", 'KS1', 'KS2', 'KS3', 'KS4', 'KS5').default(null),
+        examBoard: Joi.string().allow("State Board", "CBSE", "ICSE", "CISCE", "NIOS", "IB", "CIE").default(null)
     })
 
     return joiSchema.validateAsync(Class);

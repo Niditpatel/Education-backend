@@ -67,7 +67,7 @@ exports.login = async (req, res) => {
         const user = await findUserByMailService(email);
         if (user) {
             if (user.isVerified === true) {
-                if (user.status === true) {
+                if (user.Approved === true) {
                     const id = (user._id).valueOf();
                     const isValidPassword = await bcrypt.compare(password, user.password);
                     if (isValidPassword) {
@@ -135,7 +135,7 @@ exports.activeAccount = (req, res) => {
         jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET, { algorithms: 'HS256' }, async (err, user) => {
             if (!err) {
                 const existsUser = await findUserByIdService(user.id);
-                if (existsUser !== null && existsUser.verificationToken !== null && existsUser.status !== true) {
+                if (existsUser !== null && existsUser.verificationToken !== null && existsUser.Approved !== true) {
                     if (existsUser.verificationToken.token === token, existsUser.verificationToken.isFor === 'verification') {
                         if (existsUser.verificationToken.expIn > Date.now()) {
                             res.status(200).json({ success: 1, id: (existsUser._id).valueOf(), isFor: 'verification', message: "Set Password to Active Your Account" });
@@ -198,7 +198,7 @@ exports.forgotPassword = async (req, res) => {
                 await mailService(subject, url, mailtext, user.email);
                 res.status(200).json({ success: 1, token: verificationToken, message: 'Reset password request is sent to the registered email' })
             } else if (user.verificationToken.isFor === 'verification') {
-                res.status(400).json({ success: 0, message: 'verify your account first' });
+                res.status(400).json({ success: 0, message: 'verify  Account First' });
             }
         } else {
             res.status(404).json({ success: 0, message: "please enter valid registered email address" });
@@ -219,7 +219,7 @@ exports.resetPassword = async (req, res) => {
                 if (password) {
                     const hashPassword = await geneartePassword(password);
                     if (isFor === 'verification') {
-                        await findUserByIdAndUpdateService(existsUser._id, { password: hashPassword, verificationToken: null, status: true });
+                        await findUserByIdAndUpdateService(existsUser._id, { password: hashPassword, verificationToken: null, Approved: true });
                     } else {
                         await findUserByIdAndUpdateService(existsUser._id, { password: hashPassword, verificationToken: null });
                     }

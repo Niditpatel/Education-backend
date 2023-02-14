@@ -32,7 +32,7 @@ const userSchmea = new mongoose.Schema({
         default: false,
     },
     // account is approved or not 
-    status: {
+    Approved: {
         type: Boolean,
         default: false,
     },
@@ -81,7 +81,7 @@ function validateUser(user) {
         password: Joi.string().default(null).min(8).max(18).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/),
         role: Joi.string().allow("SuperAdmin", "SchoolAdmin", "Teacher", "User").default("Teacher"),
         isVerified: Joi.boolean().default(false),
-        status: Joi.boolean().default(false),
+        Approved: Joi.boolean().default(false),
         verificationToken: Joi.object({
             token: Joi.string(),
             expIn: Joi.number(),

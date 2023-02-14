@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const { Institute } = require('../Models/Institution');
 
 
@@ -6,6 +7,13 @@ const findInstituteByIdentifier = async (identifier) => {
     const institute = await Institute.findOne({ identifier: identifier });
     if (institute) {
         return institute
+    }
+}
+
+const findInstituteById = async (id) => {
+    const institute = await Institute.findById(mongoose.Types.ObjectId(id));
+    if (institute) {
+        return institute;
     }
 }
 
@@ -34,4 +42,5 @@ module.exports = {
     deleteInstituteService,
     updateInstituteService,
     listInstitutesService,
+    findInstituteById
 }

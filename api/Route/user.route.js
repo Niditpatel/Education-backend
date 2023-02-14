@@ -12,6 +12,6 @@ router.get('/:id', UserController.findUser);
 router.delete('/:id', UserController.userDelete);
 
 router.put('/:id', UserController.userUpdate);
-
+router.put('/approved/:id', UserController.updateStatus);
 
 module.exports = router;

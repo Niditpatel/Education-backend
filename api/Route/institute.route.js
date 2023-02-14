@@ -11,6 +11,7 @@ router.get('/', InstituteController.instituteList);
 router.get('/type', InstituteController.getTypes);
 router.get('/territory', InstituteController.getTerritory);
 router.get('/level', InstituteController.getLevel);
+router.get('/:id', InstituteController.instituteById);
 
 router.delete('/:id', InstituteController.instituteDelete);
 

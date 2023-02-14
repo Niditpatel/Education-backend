@@ -1,3 +1,4 @@
+const http = require('http')
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -19,4 +20,6 @@ app.use('/book', require('./api/Route/book.route'));
 
 
 const db = mongoose.connect("mongodb://localhost/ControllerApp").then(() => console.log("db connected")).catch((e) => console.log(e));
-app.listen(3000, () => console.log("server connected"));
+// app.listen(3000, () => console.log("server connected"));
+const appServer = http.createServer(app);
+appServer.listen(3000)

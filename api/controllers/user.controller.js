@@ -5,6 +5,19 @@ const { findUserByIdAndDeleteService, findOneUserAndDeleteService, findUserByIdA
 const { mailService } = require('../Services/mail.service')
 
 
+
+
+exports.updateStatus = async (req, res) => {
+    const id = req.params.id;
+    console.log(id)
+    try {
+        const user = await findUserByIdAndUpdateService(id, { Approved: true });
+        res.status(200).json({ success: 1, message: user.firstName + " " + user.lastName + "is Approved." })
+    } catch (e) {
+        res.status(400).json({ success: 0, message: e.message });
+    }
+}
+
 exports.findUser = async (req, res) => {
     const id = req.params.id;
     try {
@@ -103,13 +116,13 @@ exports.userList = async (req, res) => {
     const sort_order = ((order !== undefined && order.length > 0) ? parseInt(order) : 1);
     const sort_field = ((sort_by !== undefined && sort_by.length > 0) ? sort_by : '_id');
     const page_limit = ((limit !== undefined && limit.length > 0) ? parseInt(limit) : 5);
-    const page_no = ((offset !== undefined && offset.length > 0) ? parseInt(offset) : 0);
+    const page_no = ((offset !== undefined && offset.length > 0) ? parseInt(offset) - 1 : 0)
 
     // if super  admin  
     if (req.user.role === "SuperAdmin") {
         const filter_role = ((role !== undefined && role.length > 0) ? [...role.split('&&')] : ["SchoolAdmin", "Teacher", "User", "SuperAdmin"]);
         const school_filter = ((search_schools !== undefined && search_schools.length > 0) ? [...search_schools.split('&&').map(item => mongoose.Types.ObjectId(item))] : '');
-        const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1, institute: 1 };
+        const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1, institute: 1, Approved: 1, isVerified: 1 };
 
         const school_filter_query = (school_filter.length > 0 ? { $in: school_filter } : { $exists: true })
         const user_filter_query = {
@@ -167,7 +180,7 @@ exports.userList = async (req, res) => {
     else {
         const filter_role = ((role !== undefined && role.length > 0) ? [...role.split('&&')] : ["Teacher", "User"]);
 
-        const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1 };
+        const display_fields = { firstName: 1, lastName: 1, email: 1, title: 1, role: 1, Approved: 1 };
 
         const user_filter_query = {
             $and: [
@@ -206,7 +219,7 @@ exports.userList = async (req, res) => {
                 },
             ]);
             if (listData[0].data.length > 0) {
-                res.status(200).json({ data: listData[0].data, count: count, message: "success", success: 1 });
+                res.status(200).json({ data: listData[0].data, count: listData[0].metadata[0].total, message: "success", success: 1 });
             } else {
                 res.status(404).json({ success: 0, message: 'no data found with match query' })
             }
