@@ -1,0 +1,206 @@
+[{
+  "_id": {
+    "$oid": "63db8df85a8e78586eea39af"
+  },
+  "name": "Gec GandhiNagar",
+  "identifier": "11223344556432",
+  "addressLine1": "Sec - 26 , Gandhinagar",
+  "addressLine2": null,
+  "city": "GandhiNagar",
+  "postcode": "380082",
+  "country": "india",
+  "territory": "Delhi",
+  "localAuthority": "Gujarat",
+  "homePage": null,
+  "level": "Degree",
+  "noOfStudents": 5000,
+  "type": "College",
+  "isGuest": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675333112718"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675333112718"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63db8e335a8e78586eea39b2"
+  },
+  "name": "DDIT",
+  "identifier": "11223344556430",
+  "addressLine1": "Nadiyad",
+  "addressLine2": null,
+  "city": "GandhiNagar",
+  "postcode": "380085",
+  "country": "india",
+  "territory": "Delhi",
+  "localAuthority": "Gujarat",
+  "homePage": null,
+  "level": "Degree",
+  "noOfStudents": 8000,
+  "type": "College",
+  "isGuest": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675333171008"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675333171008"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63db8e575a8e78586eea39b5"
+  },
+  "name": "Ld Institute",
+  "identifier": "11223344556435",
+  "addressLine1": "Ahemadabad",
+  "addressLine2": null,
+  "city": "Ahemadabad",
+  "postcode": "380088",
+  "country": "india",
+  "territory": "Delhi",
+  "localAuthority": "Gujarat",
+  "homePage": null,
+  "level": "Degree",
+  "noOfStudents": 9000,
+  "type": "College",
+  "isGuest": true,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675333207412"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675333207412"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63dc9f84e56f62f900f8f842"
+  },
+  "name": "DAIICT",
+  "identifier": "35698651313224",
+  "addressLine1": "Near Infocity , sec-1, Gandhinagar",
+  "addressLine2": "",
+  "city": "Gandhinagar",
+  "postcode": "380080",
+  "country": "India",
+  "territory": "Delhi",
+  "localAuthority": "Gujarat",
+  "homePage": "",
+  "level": "Degree",
+  "noOfStudents": 3000,
+  "type": "College",
+  "isGuest": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675403140805"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675403140805"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63dcae63b26190bb5a0fe1eb"
+  },
+  "name": "BAPS Vidhyamandir",
+  "identifier": "67534534345357",
+  "addressLine1": "Infront of AksharMandir , Gondal",
+  "addressLine2": "",
+  "city": "Rajkot",
+  "postcode": "360370",
+  "country": "India",
+  "territory": "Delhi",
+  "localAuthority": "Gujarat",
+  "homePage": "",
+  "level": "Higher Secondary",
+  "noOfStudents": null,
+  "type": "Other",
+  "isGuest": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675406947410"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675406947410"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63dcd073b26190bb5a0fe355"
+  },
+  "name": "asdad",
+  "identifier": "34654654646464",
+  "addressLine1": "6546546546546",
+  "addressLine2": "456546546",
+  "city": "54645654645",
+  "postcode": "654654",
+  "country": "45654654654",
+  "territory": "Chandigarh",
+  "localAuthority": "54654654",
+  "homePage": "456456456",
+  "level": "Pre Primary",
+  "noOfStudents": {
+    "$numberLong": "466546546546"
+  },
+  "type": "Secondary School",
+  "isGuest": false,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675415667117"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675415667117"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63e1dd586ff2a10821a17c83"
+  },
+  "name": "asdad",
+  "identifier": "12222222222222",
+  "addressLine1": "eqwdasasdad",
+  "addressLine2": "",
+  "city": "Gandhinagar",
+  "postcode": "123213",
+  "country": "1123123",
+  "territory": "Ladakh",
+  "localAuthority": "Diu ",
+  "homePage": "123123",
+  "level": "Other",
+  "noOfStudents": 21312312,
+  "type": "Primary School",
+  "isGuest": true,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675746648434"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675862471570"
+    }
+  },
+  "__v": 0
+}]

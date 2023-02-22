@@ -1,0 +1,189 @@
+{
+  "_id": {
+    "$oid": "63e3708fe90852bfc673f0b6"
+  },
+  "firstName": "Nidit",
+  "lastName": "Patel",
+  "email": "criticalgaming@gmail.com",
+  "title": "Mr",
+  "institute": {
+    "$oid": "63db8df85a8e78586eea39af"
+  },
+  "password": "$2b$10$ciwR4Rzt9SBb8foFN5G1HukBiSvjWHUqgpkbwzejG.oSLXsABO/FG",
+  "role": "SuperAdmin",
+  "isVerified": true,
+  "Approved": true,
+  "verificationToken": null,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675849871862"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675849923354"
+    }
+  },
+  "__v": 0
+}
+{
+  "_id": {
+    "$oid": "63e372e3d2176bf7650cf218"
+  },
+  "firstName": "Nidit",
+  "lastName": "Visaveliya",
+  "email": "niditpatel2611@gmail.com",
+  "title": "Mr",
+  "institute": {
+    "$oid": "63db8df85a8e78586eea39af"
+  },
+  "password": "$2b$10$lXGkzQmHqPpI0SRqDpxkTeLgtfP11VsL/qcZe11gUVL97ZSyet2KC",
+  "role": "SuperAdmin",
+  "isVerified": true,
+  "Approved": true,
+  "verificationToken": null,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675850467035"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675850880619"
+    }
+  },
+  "__v": 0
+}
+{
+  "_id": {
+    "$oid": "63e372e3d2176bf7650cf218"
+  },
+  "firstName": "Nidit",
+  "lastName": "Visaveliya",
+  "email": "niditpatel2611@gmail.com",
+  "title": "Mr",
+  "institute": {
+    "$oid": "63db8df85a8e78586eea39af"
+  },
+  "password": "$2b$10$lXGkzQmHqPpI0SRqDpxkTeLgtfP11VsL/qcZe11gUVL97ZSyet2KC",
+  "role": "SuperAdmin",
+  "isVerified": true,
+  "Approved": true,
+  "verificationToken": null,
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675850467035"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675850880619"
+    }
+  },
+  "__v": 0
+}
+{
+  "_id": {
+    "$oid": "63e377a2d80a4dbec7edfc42"
+  },
+  "firstName": "abc",
+  "lastName": "def",
+  "email": "abcdef@gmail.com",
+  "title": "Mrs",
+  "institute": {
+    "$oid": "63db8e575a8e78586eea39b5"
+  },
+  "password": null,
+  "role": "Teacher",
+  "isVerified": true,
+  "Approved": true,
+  "verificationToken": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzZTM3N2EyZDgwYTRkYmVjN2VkZmM0MiIsImlhdCI6MTY3NTg1MTY4Mn0.jj2hmRyf-uA4FtrxLpW9mmgBtIgO_ZVshLtWAg7p_SM",
+    "expIn": 1676024482603,
+    "isFor": "verification",
+    "_id": {
+      "$oid": "63e377a2d80a4dbec7edfc44"
+    }
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675851682600"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675853771653"
+    }
+  },
+  "__v": 0
+}
+{
+  "_id": {
+    "$oid": "63e377bfd80a4dbec7edfc48"
+  },
+  "firstName": "ds",
+  "lastName": "fsd",
+  "email": "sdffs@gmail.com",
+  "title": "Miss",
+  "institute": {
+    "$oid": "63db8e575a8e78586eea39b5"
+  },
+  "password": null,
+  "role": "User",
+  "isVerified": true,
+  "Approved": false,
+  "verificationToken": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzZTM3N2JmZDgwYTRkYmVjN2VkZmM0OCIsImlhdCI6MTY3NTg1MTcxMX0.Hlep0nYP6ax04qrZilEI8Y3FQAF_RPn0FC4aZk1TZz8",
+    "expIn": 1676024511726,
+    "isFor": "verification",
+    "_id": {
+      "$oid": "63e377bfd80a4dbec7edfc4a"
+    }
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675851711719"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675851711726"
+    }
+  },
+  "__v": 0
+}
+{
+  "_id": {
+    "$oid": "63e4829586713eef5e384a02"
+  },
+  "firstName": "Abc",
+  "lastName": "def",
+  "email": "qreffef@gmail.com",
+  "title": "Mr",
+  "institute": {
+    "$oid": "63db8e335a8e78586eea39b2"
+  },
+  "password": null,
+  "role": "SchoolAdmin",
+  "isVerified": true,
+  "Approved": false,
+  "verificationToken": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzZTQ4Mjk1ODY3MTNlZWY1ZTM4NGEwMiIsImlhdCI6MTY3NTkyMDAyMX0.LP5WQHE_fj_quTgfh8Lm1fT8f9dP53TM8Jfvpaskk9k",
+    "expIn": 1676092821758,
+    "isFor": "verification",
+    "_id": {
+      "$oid": "63e4829586713eef5e384a04"
+    }
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1675920021739"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1675920021761"
+    }
+  },
+  "__v": 0
+}

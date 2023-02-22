@@ -1,0 +1,12 @@
+[{
+  "_id": {
+    "$oid": "63b6cc26e9967108ac6e81c9"
+  },
+  "title": "study hard",
+  "publisher": "niidt ",
+  "isbn": "1234567890123",
+  "pdfisbn": "1234567890124",
+  "imprint": "hemal kaklotar",
+  "isActive": 0,
+  "__v": 0
+}]

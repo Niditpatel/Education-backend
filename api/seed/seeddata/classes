@@ -1,0 +1,17 @@
+[{
+  "_id": {
+    "$oid": "63b6bfa1a537b723ab39188c"
+  },
+  "name": "10th/A",
+  "yearGroup": "2022",
+  "noOfStudents": 40,
+  "assignee": [
+    "admin"
+  ],
+  "institute": {
+    "$oid": "63db8df85a8e78586eea39af"
+  },
+  "keyStage": "KS1",
+  "examBoard": "EdExcel",
+  "__v": 0
+}]
